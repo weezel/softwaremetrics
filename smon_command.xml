@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<sourcemonitor_commands>
+
+   <write_log>true</write_log>
+
+   <command>
+   <project_file>itext_metrics.smp</project_file>
+       <project_language>Java</project_language>
+       <file_extensions>*.java</file_extensions>
+	   <source_directory>itext</source_directory>
+       <include_subdirectories>true</include_subdirectories>
+       <!-- No checkpoint name specified, generate one -->
+       <checkpoint_name></checkpoint_name>
+       <export>
+           <export_file>checkpoints.xml</export_file>
+           <export_type>2 (checkpoint details as XML)</export_type>
+           <export_option>3</export_option>
+       </export>
+   </command>
+ 
+</sourcemonitor_commands>
