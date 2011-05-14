@@ -13,10 +13,9 @@ import rpy2.robjects as robjects
 
 
 # Absolute path to SourceMonitor and also runnable binary must be included
-sourcemonitor_cmd = "/home/weezel/apps/SourceMonitor/SourceMonitor.exe"
-i = 0
-revisions = 4860
-#revisions = 53
+sourcemonitor_cmd = "/ABSOLUTE_PATH/SourceMonitor.exe"
+i = 1
+revisions = 4861
 
 
 def aggregator(revnro):
@@ -44,12 +43,18 @@ def aggregator(revnro):
         noMethods += int(file.getAttribute("method_count"))
         
     #Parse XML and ignore incorrect metrics from SourceMonitor
+    boundary = 100000
     for method in metricsTags:
-        if int(method.getElementsByTagName("complexity").item(0).firstChild.data) != 1550214256:
+        complextmp = int(method.getElementsByTagName("complexity").item(0).firstChild.data)
+        statementstmp = int(method.getElementsByTagName("statements").item(0).firstChild.data)
+        callstmp = int(method.getElementsByTagName("calls").item(0).firstChild.data)
+
+        # Values that will exceed boundary value, are too big
+        if complextmp > boundary or statementstmp > boundary or callstmp > boundary:
+            continue
+        else:
             McCabes.append(int(method.getElementsByTagName("complexity").item(0).firstChild.data))
-        if int(method.getElementsByTagName("statements").item(0).firstChild.data) != 1550214256:
             noStatements.append(int(method.getElementsByTagName("statements").item(0).firstChild.data))
-        if int(method.getElementsByTagName("calls").item(0).firstChild.data) != 1550214256:
             noMethodsCalled.append(int(method.getElementsByTagName("calls").item(0).firstChild.data))
 
     for i in range(len(McCabes)):
@@ -77,63 +82,29 @@ def aggregator(revnro):
     moments = importr("moments")
     
     # Aggregate metrics
-    meanMcCabe = r.mean(robjects.IntVector(McCabes))[0]
-    meanNoStatements = r.mean(robjects.IntVector(noStatements))[0]
-    meanNoMethodCalls = r.mean(robjects.IntVector(noMethodsCalled))[0]
+    meanMcCabe = r.mean(robjects.FloatVector(McCabes))[0]
+    meanNoStatements = r.mean(robjects.FloatVector(noStatements))[0]
+    meanNoMethodCalls = r.mean(robjects.FloatVector(noMethodsCalled))[0]
     
-    medianMcCabe = r.median(robjects.IntVector(McCabes))[0]
-    medianNoStatements = r.median(robjects.IntVector(noStatements))[0]
-    medianNoMethodCalls = r.median(robjects.IntVector(noMethodsCalled))[0]
+    medianMcCabe = r.median(robjects.FloatVector(McCabes))[0]
+    medianNoStatements = r.median(robjects.FloatVector(noStatements))[0]
+    medianNoMethodCalls = r.median(robjects.FloatVector(noMethodsCalled))[0]
     
-    coeffMcCabe = ineq.var_coeff(robjects.IntVector(McCabes))[0]
-    coeffNoStatements = ineq.var_coeff(robjects.IntVector(noStatements))[0]
-    coeffNoMethodCalls = ineq.var_coeff(robjects.IntVector(noMethodsCalled))[0]
+    coeffMcCabe = ineq.var_coeff(robjects.FloatVector(McCabes))[0]
+    coeffNoStatements = ineq.var_coeff(robjects.FloatVector(noStatements))[0]
+    coeffNoMethodCalls = ineq.var_coeff(robjects.FloatVector(noMethodsCalled))[0]
     
-    skewnessMcCabe = moments.skewness(robjects.IntVector(McCabes))[0]
-    skewnessNoStatements = moments.skewness(robjects.IntVector(noStatements))[0]
-    skewnessNoMethodCalls = moments.skewness(robjects.IntVector(noMethodsCalled))[0]
+    skewnessMcCabe = moments.skewness(robjects.FloatVector(McCabes))[0]
+    skewnessNoStatements = moments.skewness(robjects.FloatVector(noStatements))[0]
+    skewnessNoMethodCalls = moments.skewness(robjects.FloatVector(noMethodsCalled))[0]
     
-    giniMcCabe = ineq.Gini(robjects.IntVector(McCabes))[0]
-    giniNoStatements = ineq.Gini(robjects.IntVector(noStatements))[0]
-    giniNoMethodCalls = ineq.Gini(robjects.IntVector(noMethodsCalled))[0]
+    giniMcCabe = ineq.Gini(robjects.FloatVector(McCabes))[0]
+    giniNoStatements = ineq.Gini(robjects.FloatVector(noStatements))[0]
+    giniNoMethodCalls = ineq.Gini(robjects.FloatVector(noMethodsCalled))[0]
     
-    theilMcCabe = ineq.Theil(robjects.IntVector(McCabes))[0]
-    theilNoStatements = ineq.Theil(robjects.IntVector(noStatements))[0]
-    theilNoMethodCalls = ineq.Theil(robjects.IntVector(noMethodsCalled))[0]
-    
-    #print "Mean McCabe: " + str(meanMcCabe)
-    #print "Mean number of statements: " + str(meanNoStatements)
-    #print "Mean number of methods called: " + str(meanNoMethodCalls)
-    #
-    #print
-    #
-    #print "Median McCabe: " + str(medianMcCabe)
-    #print "Median number of statements: " + str(medianNoStatements)
-    #print "Median number of methods called: " + str(medianNoMethodCalls)
-    #
-    #print
-    #
-    #print "Coeffecient of Variation McCabe: " + str(coeffMcCabe)
-    #print "Coeffecient of Variation number of statements: " + str(coeffNoStatements)
-    #print "Coeffecient of Variation number of methods called: " + str(coeffNoMethodCalls)
-    #
-    #print
-    #
-    #print "Skewness of McCabe: " + str(skewnessMcCabe)
-    #print "Skewness of number of statements: " + str(skewnessNoStatements)
-    #print "Skewness of number of methods called: " + str(skewnessNoMethodCalls)
-    #
-    #print 
-    #
-    #print "Gini McCabe: " + str(giniMcCabe)
-    #print "Gini number of statements: " + str(giniNoStatements)
-    #print "Gini number of methods called: " + str(giniNoMethodCalls)
-    #
-    #print
-    #
-    #print "Theil McCabe: " + str(theilMcCabe)
-    #print "Theil number of statements: " + str(theilNoStatements)
-    #print "Theil number of methods called: " + str(theilNoMethodCalls)
+    theilMcCabe = ineq.Theil(robjects.FloatVector(McCabes))[0]
+    theilNoStatements = ineq.Theil(robjects.FloatVector(noStatements))[0]
+    theilNoMethodCalls = ineq.Theil(robjects.FloatVector(noMethodsCalled))[0]
     
     outputAggregated = "aggregated.csv"
      # Print aggregated metrics to a CSV file
@@ -213,7 +184,6 @@ commands.getoutput("svn update -r %d itext/" % i)
 # Cook sourcemonitor_cmd arguments
 sourcemonitor_cmd = "%s %s %s" % ("wine", sourcemonitor_cmd, "/C smon_command.xml")
 
-log2file = open("runresults.log", "a")
 
 while i <= revisions:
     changed_files = "svn diff -r %d:%d --summarize itext/ |grep '\/src\/' |grep -ci .java" % (i - 1, i)
@@ -221,7 +191,14 @@ while i <= revisions:
     # Count changed files
     cfiles_output = commands.getoutput(changed_files)
     print "%d-%d revisions, files touched: %d" % (i - 1, i, int(cfiles_output))
-    log2file.write("%d-%d revisions, files touched: %d\n" % (i - 1, i, int(cfiles_output)))
+    # Log touched files between revisions to file
+    try:
+        log2file = open("runresults.log", "a")
+        log2file.write("%d-%d revisions, files touched: %d\n" % (i - 1, i, int(cfiles_output)))
+    except IOError, e:
+        print "File error: %s" % e
+    finally:
+        log2file.close()
 
 
     # No changed java files -> no need to generate stats.
@@ -231,7 +208,7 @@ while i <= revisions:
         stderr.write("Running SourceMonitor for current revision, please wait...\n")
         commands.getoutput(sourcemonitor_cmd)
 
-        # Code from Matias comes here
+        # Metrics calculations
         aggregator(i)
         os.remove("checkpoints.xml")
         os.remove("itext_metrics.smp")
@@ -241,4 +218,3 @@ while i <= revisions:
     i += 1
     commands.getoutput("svn update -r %d itext/" % i)
 
-log2file.close()

@@ -4,17 +4,19 @@
    <write_log>true</write_log>
 
    <command>
+   <!-- Results will be appended to the project file -->
    <project_file>itext_metrics.smp</project_file>
        <project_language>Java</project_language>
+       <!-- Only calculate metrics for .java extensions -->
        <file_extensions>*.java</file_extensions>
-	   <source_directory>itext</source_directory>
+       <source_directory>itext</source_directory>
        <include_subdirectories>true</include_subdirectories>
-       <!-- No checkpoint name specified, generate one -->
+       <!-- No checkpoint name specified, generate one iteratively-->
        <checkpoint_name></checkpoint_name>
        <export>
            <export_file>checkpoints.xml</export_file>
            <export_type>2 (checkpoint details as XML)</export_type>
-           <export_option>3</export_option>
+           <export_option>3 (metrics exported in XML)</export_option>
        </export>
    </command>
  
